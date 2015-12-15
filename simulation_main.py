@@ -17,8 +17,8 @@ WORLD_Y = 100
 NUM_OBJECTS=10
 
 objects = range(0,NUM_OBJECTS)
-locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.1,pheromone_deposit=1,evap_const=0.1)
-prob_shifted_locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.1,pheromone_deposit=1,evap_const=0.1)
+locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.2,pheromone_deposit=1,evap_const=0.5)
+prob_shifted_locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.3,pheromone_deposit=1,evap_const=0.5)
 
 mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
@@ -55,6 +55,8 @@ for i in range(0,NUM_ANTS):
     p_ants.append(ant.Ant(i,prob_shifted_locations))
     
 for step in range(0,NUM_STEPS):
+    locations.ep=max(1/(step+1),0.5)
+    locations.pheromone_deposit=(step+1)/NUM_STEPS
     for i,a in enumerate(ants):
         a.tour(locations)
         path_len = a.calc_path_length()
@@ -73,6 +75,7 @@ for step in range(0,NUM_STEPS):
         #locations.update_pheromone(best_path)
 
 for step in range(0,NUM_STEPS):
+    prob_shifted_locations.ep=max(1/(step+1),0.1)
     for i,a in enumerate(p_ants):
         a.tour(prob_shifted_locations)
         path_len = a.calc_path_length()
@@ -81,7 +84,7 @@ for step in range(0,NUM_STEPS):
             best_p_path = a.path
             print "best p_path: ", best_p_path_len
 
-        elif path_len < best_path_len:
+        elif path_len < best_p_path_len:
             best_p_path_len = path_len
             best_p_path = a.path
             print "best p_path: ", best_p_path_len
