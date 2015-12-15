@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import numpy
 import math
+import ant
 
 class World:
-    def __init__(self,num_cities,init_pheromone=0.5,a=0.2,b=0.2,ep=0.01):
+    def __init__(self,num_cities,init_pheromone=1,a=1,b=3,ep=0.01,pheromone_deposit=1,evap_const=0.6):
         self.cities=[]
-        self.evaporationConst=0.1
+        self.evaporationConst=evap_const
+        self.pheromone_deposit=1
         self.dist_weight=0.1
         self.pheromone=numpy.zeros((num_cities,num_cities))
         self.pheromone[:]=init_pheromone
@@ -26,5 +28,13 @@ class World:
                     self.attractiveness[i][j] = 1/distance
                 else:
                     self.attractiveness[i][j] = 0
+
+    def update_pheromone(self,a):
+        for i in xrange(0,len(a.path),2):
+            curr_pher = self.pheromone[a.path[i].index][a.path[i+1].index]
+            self.pheromone[a.path[i].index][a.path[i+1].index] = curr_pher + self.pheromone_deposit/a.path_length
+
+        self.pheromone = self.pheromone*(1-self.evaporationConst)
+#        self.pheromone = self.pheromone*(1-self.evaporationConst) + self.pheromone_deposit/path_len
 
             
