@@ -7,7 +7,7 @@ import ant
 
 random.seed(2)
 
-NUM_CITIES=200
+NUM_CITIES=20
 NUM_ANTS=20
 NUM_STEPS=1000
 WORLD_X = 100
