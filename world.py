@@ -30,11 +30,12 @@ class World:
                     self.attractiveness[i][j] = 0
 
     def update_pheromone(self,a):
-        for i in xrange(0,len(a.path),2):
+        for i in xrange(0,len(a.path)-1,2):
             curr_pher = self.pheromone[a.path[i].index][a.path[i+1].index]
             self.pheromone[a.path[i].index][a.path[i+1].index] = curr_pher + self.pheromone_deposit/a.path_length
 
         self.pheromone = self.pheromone*(1-self.evaporationConst)
 #        self.pheromone = self.pheromone*(1-self.evaporationConst) + self.pheromone_deposit/path_len
 
-            
+    def get_pheromone(self,i,j):
+        return self.pheromone[i][j]
