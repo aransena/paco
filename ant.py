@@ -46,7 +46,7 @@ class Ant:
 
     def calc_path_length(self):
         sum_dist=0
-        for i in xrange(0,len(self.path),2):
+        for i in xrange(0,len(self.path)-1,2):
             distance =  math.sqrt(math.pow((self.path[i].x-self.path[i+1].x),2)+math.pow((self.path[i].y-self.path[i+1].y),2))            
             sum_dist=sum_dist+distance
         self.path_length = sum_dist

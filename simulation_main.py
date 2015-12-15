@@ -7,14 +7,14 @@ import ant
 
 random.seed(2)
 
-NUM_CITIES=10
-NUM_ANTS=10
+NUM_CITIES=200
+NUM_ANTS=20
 NUM_STEPS=1000
 WORLD_X = 100
 WORLD_Y = 100
 
 
-locations = world.World(NUM_CITIES)
+locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.01,pheromone_deposit=1,evap_const=0.1)
 prob_shifted_locations = world.World(NUM_CITIES, init_pheromone=0.3,a=0.5,b=0.4)
 
 mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
