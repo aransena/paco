@@ -33,15 +33,15 @@ mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
 if mode==1:
     increment = 360.0/NUM_CITIES
 
-x = numpy.linspace(0,10,NUM_CITIES)
-y1 = norm.pdf(x,loc=5,scale=1)
-y2 = norm.pdf(x,loc=10,scale=1)
-y = (y1+y2)
-y = y/sum(y)
+xx = numpy.linspace(0,10,NUM_CITIES)
+y1 = norm.pdf(xx,loc=5,scale=1)
+y2 = norm.pdf(xx,loc=10,scale=1)
+yy = [a + b for a, b in zip(y1, y2)]
+
 #y = pareto.pdf(x,1)
 #y = lognorm.pdf(x,50)
 
-prob_distribution= y
+prob_distribution= yy
 #print "probs: ", prob_distribution
 
 for i in range(0,NUM_CITIES):
@@ -125,6 +125,6 @@ for i in range(0,NUM_CITIES):
         plt.plot([prob_shifted_locations.cities[i].x,prob_shifted_locations.cities[j].x],[prob_shifted_locations.cities[i].y,prob_shifted_locations.cities[j].y], 'r-', alpha=locations.get_pheromone(i,j)/max_pher)
 
 plt.figure(4)
-plt.plot(x,y)
+plt.plot(xx,yy)
 plt.show()
     
