@@ -17,13 +17,10 @@ WORLD_Y = 100
 NUM_OBJECTS=10
 
 objects = range(0,NUM_OBJECTS)
-<<<<<<< HEAD
+
 locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=3,ep=0.1,pheromone_deposit=1,evap_const=0.5)
 prob_shifted_locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=3,ep=0.1,pheromone_deposit=1,evap_const=0.5)
-=======
-locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.2,pheromone_deposit=1,evap_const=0.5)
-prob_shifted_locations = world.World(NUM_CITIES,init_pheromone=1,a=1,b=5,ep=0.3,pheromone_deposit=1,evap_const=0.5)
->>>>>>> 48751e4d7f690539f1aed7571c6fe13573424948
+
 
 mode = 0 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
