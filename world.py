@@ -61,9 +61,37 @@ class World:
                     self.routing_table[c.index][t_c.index]=numerator/denom
                 else:
                     self.routing_table[c.index][t_c.index]=0
-                        
-
                                     
     def city_sum(self, city_x,city_y):
         calc = (math.pow(self.pheromone[city_x.index][city_y.index], self.alpha))*(math.pow(self.attractiveness[city_x.index][city_y.index],self.beta))
         return calc
+
+    def get_best_path(self, params):
+        NUM_CITIES=params[0]
+        NUM_ANTS=params[1]
+        NUM_STEPS=params[2]
+
+        ants=[]
+        
+        for i in xrange(0,NUM_ANTS):
+            ants.append(ant.Ant(i,self))
+
+            for step in xrange(0,NUM_STEPS):
+                path_lens=[]
+                paths=[]
+
+                for a in ants:
+                    a.tour(self)
+                    path_len = a.calc_path_length()
+                    path_lens.append(path_len)
+                    paths.append(a.path)
+
+                best_path_len = min(path_lens)
+                best_path = paths[path_lens.index(best_path_len)]
+                print "best path: ", best_path_len, " step: ", step
+                
+                for a in ants:
+                    self.update_pheromone(a)
+                    self.update_routing_table(a)
+            
+            return best_path
