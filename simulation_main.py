@@ -9,6 +9,7 @@ import numpy
 import sys
 import datetime
 import time
+import bisect
 
 ts = time.time()
 dt = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
@@ -16,12 +17,12 @@ Root = "Result_Images/"
 
 plot=False
 
-mode = 0 #Mode 0: Uninform random Distribution, Mode 1: Circle
+mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
 SEED_NUM=2
 random.seed(2)
 numpy.random.seed(2)
-NUM_CITIES=100
+NUM_CITIES=10
 NUM_ANTS=max(int(NUM_CITIES/5),2)
 NUM_STEPS=10
 WORLD_X = 100
@@ -59,10 +60,10 @@ if mode==1:
     increment = 360.0/NUM_CITIES
 
 xx = numpy.linspace(0,10,NUM_CITIES)
-yy = norm.pdf(xx,loc=5,scale=1)
-#y2 = norm.pdf(xx,loc=7,scale=1)
-#yy = [a + b for a, b in zip(y1, y2)]
-print yy
+y1 = norm.pdf(xx,loc=2,scale=1)
+y2 = norm.pdf(xx,loc=8,scale=1)
+yy = [a + b for a, b in zip(y1, y2)]
+#print yy
 yy = yy/(sum(yy))
 
 #y = pareto.pdf(xx,1)
@@ -94,7 +95,19 @@ for i, c in enumerate(locations.cities):
         
         prob_shifted_locations.add_cities(city.City(i, (c.x)/c.probability, (c.y)/c.probability,1))
 
+max_likelihood=[0]
+for c in locations.cities[1:]:
+    bisect.insort(max_likelihood,c.probability)
 
+temp_c = list(locations.cities)
+
+max_likelihood_path=[]
+for m_l in max_likelihood:
+    for i,c in enumerate(temp_c):
+        if c.probability==m_l:
+            max_likelihood_path.append(temp_c.pop(i))
+max_likelihood_path=list(reversed(max_likelihood_path))
+print "ML: ",len(max_likelihood_path)
 locations.add_objects(objects)
 
 locations.calc_attraction() # revisit - inefficient
@@ -126,7 +139,7 @@ f.write(str_wr)
 import matplotlib.pyplot as plt
 plt.figure(1)
 plt.autoscale(tight=False)
-plt.subplot(121)
+plt.subplot(131)
 plt.margins(0.1,0.1)
 for i,c in enumerate(locations.cities):
     if i == 0:
@@ -142,7 +155,7 @@ for i in xrange(0,len(best_p_path)-1):
 
 plt.title('probability shifted route')
 
-plt.subplot(122)
+plt.subplot(132)
 plt.margins(.1,.1)
 for i,c in enumerate(locations.cities):
     if i == 0:
@@ -156,6 +169,21 @@ for i in xrange(0,len(best_path)-1):
     plt.plot([best_path[i].x,best_path[i+1].x],[best_path[i].y,best_path[i+1].y],'c-', linewidth=2.0,alpha=0.4)
 
 plt.title('shortest route')
+
+plt.subplot(133)
+plt.margins(.1,.1)
+for i,c in enumerate(locations.cities):
+    if i == 0:
+        plt.plot(c.x, c.y,'go')
+    elif i == len(locations.cities)-1:
+        plt.plot(c.x, c.y,'ro')
+    else:
+        plt.plot(c.x, c.y,'bo')
+
+for i in xrange(0,len(max_likelihood_path)-1):
+    plt.plot([max_likelihood_path[i].x,max_likelihood_path[i+1].x],[max_likelihood_path[i].y,max_likelihood_path[i+1].y],'c-', linewidth=2.0,alpha=0.4)
+
+plt.title('max likelihood route')
 
 plt.savefig(Root+"optimal_paths "+dt+".png")
 
