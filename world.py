@@ -2,10 +2,14 @@
 import numpy
 import math
 import ant
+import city
 
 class World:
-    def __init__(self,num_cities,init_pheromone=1,a=1,b=3,ep=0.01,pheromone_deposit=1,evap_const=0.6):
+    def __init__(self,num_cities,init_pheromone=1,a=1,b=3,ep=0.01,pheromone_deposit=1,evap_const=0.6,num_objs=1):
         self.cities=[]
+        self.num_objects=num_objs
+        self.shortest_paths=[]
+        self.shortest_paths_lens=[]
         self.evaporationConst=evap_const
         self.pheromone_deposit=1
         self.dist_weight=0.1
@@ -25,7 +29,7 @@ class World:
         city_list=self.cities
         for i,c in enumerate(city_list):
             for j,d in enumerate(city_list):
-                distance =  math.sqrt(math.pow((c.x-d.x),2)+math.pow((c.y-d.y),2))
+                distance = self.calc_distance(c,d)
                 if distance > 0:
                     self.attractiveness[i][j] = 1/distance
                 else:
@@ -76,22 +80,60 @@ class World:
         for i in xrange(0,NUM_ANTS):
             ants.append(ant.Ant(i,self))
 
-            for step in xrange(0,NUM_STEPS):
-                path_lens=[]
-                paths=[]
+        for step in xrange(0,NUM_STEPS):
+            path_lens=[]
+            paths=[]
 
-                for a in ants:
-                    a.tour(self)
-                    path_len = a.calc_path_length()
-                    path_lens.append(path_len)
-                    paths.append(a.path)
+            for a in ants:
+                a.tour(self)
+                path_len = a.calc_path_length()
+                path_lens.append(path_len)
+                paths.append(a.path)
 
-                best_path_len = min(path_lens)
-                best_path = paths[path_lens.index(best_path_len)]
-                print "best path: ", best_path_len, " step: ", step
-                
-                for a in ants:
-                    self.update_pheromone(a)
-                    self.update_routing_table(a)
-            
-            return best_path
+            best_path_len = min(path_lens)
+            best_path = paths[path_lens.index(best_path_len)]
+            #print "step best path: ", best_path_len, " step: ", step
+            self.shortest_paths.append(best_path)
+            self.shortest_paths_lens.append(best_path_len)
+            for a in ants:
+                self.update_pheromone(a)
+                self.update_routing_table(a)
+
+        output_index = self.shortest_paths_lens.index(min(self.shortest_paths_lens))
+        output_path = self.shortest_paths[output_index]
+        print "best overall path: ", self.shortest_paths_lens[output_index]
+        self.shortest_paths=[]
+        self.shortest_paths_lens=[]
+        return output_path
+
+    def add_objects(self,objects):
+        while objects:
+            for c in self.cities:
+                if numpy.random.random() < c.probability:
+                    if objects and len(c.objects)==0:
+                        c.objects.append(objects.pop())
+
+                    else:
+                        break
+
+        for i,c in enumerate(self.cities):
+            if len(c.objects)>0:
+                print c.index, c.objects
+
+    def get_time_to_find_objects(self, path):
+        objs_found=0
+        dist_travelled=0
+        prev_city=self.cities[0]
+        for c in path[1:]:
+            if len(self.cities[c.index].objects)>0:
+                objs_found+=1
+            dist_travelled += self.calc_distance(self.cities[prev_city.index],self.cities[c.index])
+
+            if objs_found == self.num_objects:
+                return dist_travelled
+
+        return -1
+
+    def calc_distance(self,city1,city2):
+        distance =  math.sqrt(math.pow((city1.x-city2.x),2)+math.pow((city1.y-city2.y),2))
+        return distance
