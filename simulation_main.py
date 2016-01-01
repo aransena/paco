@@ -4,7 +4,7 @@ import world
 import random
 import math
 import ant
-from scipy.stats import norm,pareto,lognorm
+from scipy.stats import norm,pareto,lognorm, uniform
 import numpy
 import sys
 import datetime
@@ -15,19 +15,20 @@ ts = time.time()
 dt = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 Root = "Result_Images/"
 
-plot=False
+plot=True
 
 mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
-SEED_NUM=2
+SEED_NUM=random.random()
 random.seed(2)
 numpy.random.seed(2)
-NUM_CITIES=10
+NUM_CITIES=20
 NUM_ANTS=max(int(NUM_CITIES/5),2)
 NUM_STEPS=10
 WORLD_X = 100
 WORLD_Y = 100
 NUM_OBJECTS=max(int(NUM_CITIES/3),1)
+gamma=3
 
 i_pher=1
 alpha=1
@@ -60,25 +61,29 @@ if mode==1:
     increment = 360.0/NUM_CITIES
 
 xx = numpy.linspace(0,10,NUM_CITIES)
-y1 = norm.pdf(xx,loc=2,scale=1)
-y2 = norm.pdf(xx,loc=8,scale=1)
+#yy = uniform.pdf(xx,1,4)
+y1 = uniform.pdf(xx,1,2)
+y2 = uniform.pdf(xx,6,7)
+#y1 = norm.pdf(xx,loc=5,scale=1)
+#y2 = norm.pdf(xx,loc=8,scale=1)
 yy = [a + b for a, b in zip(y1, y2)]
 #print yy
+#yy=y1
+#yy = lognorm.pdf(xx,50)
+
 yy = yy/(sum(yy))
 
 #y = pareto.pdf(xx,1)
-#yy = lognorm.pdf(xx,50)
+
 
 prob_distribution= yy
 min_prob = (min(filter(None,prob_distribution))/10)
 for i in xrange(0,len(prob_distribution)):
     if prob_distribution[i]==0:
         prob_distribution[i]=min_prob
-        
-#print "probs: ", prob_distribution
+       
 
 for i in range(0,NUM_CITIES):
-    #prob = random.random()
     prob = prob_distribution[i]
     
     if mode == 0:
@@ -92,40 +97,43 @@ for i, c in enumerate(locations.cities):
     if i==0:
         prob_shifted_locations.add_cities(city.City(i, (c.x), (c.y),1))
     else:
-        
-        prob_shifted_locations.add_cities(city.City(i, (c.x)/c.probability, (c.y)/c.probability,1))
+        prob_shifted_locations.add_cities(city.City(i, (c.x)/math.pow(c.probability,gamma), (c.y)/math.pow(c.probability,gamma),1))
 
-max_likelihood=[0]
+max_likelihood=[]
 for c in locations.cities[1:]:
     bisect.insort(max_likelihood,c.probability)
 
 temp_c = list(locations.cities)
-
+temp_c.pop(0)
 max_likelihood_path=[]
 for m_l in max_likelihood:
     for i,c in enumerate(temp_c):
         if c.probability==m_l:
             max_likelihood_path.append(temp_c.pop(i))
+max_likelihood_path.append(locations.cities[0])            
 max_likelihood_path=list(reversed(max_likelihood_path))
-print "ML: ",len(max_likelihood_path)
+
 locations.add_objects(objects)
 
 locations.calc_attraction() # revisit - inefficient
 prob_shifted_locations.calc_attraction()
 start=time.time()
-best_path = locations.get_best_path(params)
-best_p_path = prob_shifted_locations.get_best_path(params)
+shortest_path = locations.get_best_path(params)
+prob_shifted_path = prob_shifted_locations.get_best_path(params)
 delT=time.time()-start
 
-time_to_find_pshifted = locations.get_time_to_find_objects(best_p_path)
-time_to_find_shortest = locations.get_time_to_find_objects(best_path)
+time_to_find_pshifted = locations.get_time_to_find_objects(prob_shifted_path)
+time_to_find_shortest = locations.get_time_to_find_objects(shortest_path)
+time_to_find_maxLikelihood = locations.get_time_to_find_objects(max_likelihood_path)
 
-print "Shortest path: ", time_to_find_shortest, " PShifted: ", time_to_find_pshifted, " Improvement: ", (time_to_find_pshifted-time_to_find_shortest)/time_to_find_shortest, " run time: ", delT
+print "Run time: ", delT
+print "Shortest path: ", time_to_find_shortest, " PShifted: ", time_to_find_pshifted, " Improvement: ", (time_to_find_pshifted-time_to_find_shortest)/time_to_find_shortest
+print "Max Likelihood path: ", time_to_find_maxLikelihood, " PShifted: ", time_to_find_pshifted, " Improvement: ", (time_to_find_pshifted-time_to_find_maxLikelihood)/time_to_find_maxLikelihood
 
 
 f = open('results.txt','a')
 str_wr = dt + ", "
-str_wr += str(time_to_find_shortest)+', '+str(time_to_find_pshifted)+', '
+str_wr += str(time_to_find_shortest)+', '+str(time_to_find_maxLikelihood)+','+ str(time_to_find_pshifted)+', ' 
 for p in params:
     str_wr+=str(p)+', '
 str_wr+=str(delT)
@@ -149,9 +157,9 @@ for i,c in enumerate(locations.cities):
     else:
         plt.plot(c.x, c.y,'bo')
 
-for i in xrange(0,len(best_p_path)-1):
+for i in xrange(0,len(prob_shifted_path)-1):
     #for c in best_path:
-    plt.plot([locations.cities[best_p_path[i].index].x,locations.cities[best_p_path[i+1].index].x],[locations.cities[best_p_path[i].index].y,locations.cities[best_p_path[i+1].index].y],'c-', linewidth=2.0,alpha=0.3)
+    plt.plot([locations.cities[prob_shifted_path[i].index].x,locations.cities[prob_shifted_path[i+1].index].x],[locations.cities[prob_shifted_path[i].index].y,locations.cities[prob_shifted_path[i+1].index].y],'c-', linewidth=2.0,alpha=0.3)
 
 plt.title('probability shifted route')
 
@@ -165,8 +173,8 @@ for i,c in enumerate(locations.cities):
     else:
         plt.plot(c.x, c.y,'bo')
 
-for i in xrange(0,len(best_path)-1):
-    plt.plot([best_path[i].x,best_path[i+1].x],[best_path[i].y,best_path[i+1].y],'c-', linewidth=2.0,alpha=0.4)
+for i in xrange(0,len(shortest_path)-1):
+    plt.plot([shortest_path[i].x,shortest_path[i+1].x],[shortest_path[i].y,shortest_path[i+1].y],'c-', linewidth=2.0,alpha=0.4)
 
 plt.title('shortest route')
 
@@ -197,9 +205,8 @@ for i,c in enumerate(prob_shifted_locations.cities):
     else:
         plt.plot(c.x, c.y,'bo')
 
-for i in xrange(0,len(best_p_path)-1):
-#for c in best_path:
-    plt.plot([best_p_path[i].x,best_p_path[i+1].x],[best_p_path[i].y,best_p_path[i+1].y],'c-', linewidth=2.0)
+for i in xrange(0,len(prob_shifted_path)-1):
+    plt.plot([prob_shifted_path[i].x,prob_shifted_path[i+1].x],[prob_shifted_path[i].y, prob_shifted_path[i+1].y],'c-', linewidth=2.0)
 
 plt.title('probability shifted route')
 
@@ -214,7 +221,7 @@ for i in range(0,NUM_CITIES):
         x = 0
         plt.plot([locations.cities[i].x,locations.cities[j].x],[locations.cities[i].y,locations.cities[j].y], 'r-', alpha=locations.get_pheromone(i,j)/max_pher)
 
-plt.title('probability shifted')
+plt.title('shortest')
         
 plt.subplot(122)
 plt.margins(0.1,0.1)
@@ -222,7 +229,7 @@ for i in range(0,NUM_CITIES):
     for j in range(0,NUM_CITIES):
         plt.plot([prob_shifted_locations.cities[i].x,prob_shifted_locations.cities[j].x],[prob_shifted_locations.cities[i].y,prob_shifted_locations.cities[j].y], 'r-', alpha=locations.get_pheromone(i,j)/max_pher)
 
-plt.title('shortest')
+plt.title('probability shifted')
 
 plt.savefig(Root+"pheromone "+dt+".png")
 
@@ -231,7 +238,21 @@ plt.plot(xx,yy)
 plt.title('underlying distribution')
 plt.savefig(Root+"distribution "+dt+".png")
 
+plt.figure(5)
+plt.margins(.1,.1)
+for i,c in enumerate(locations.cities):
+    if i == 0:
+        plt.plot(c.x, c.y,'go')
+    elif i == len(locations.cities)-1:
+        plt.plot(c.x, c.y,'ro')
+    else:
+        plt.plot(c.x, c.y,'bo')
+
+for i in xrange(0,len(shortest_path)-1):
+    plt.plot([shortest_path[i].x,shortest_path[i+1].x],[shortest_path[i].y,shortest_path[i+1].y],'c-', linewidth=2.0,alpha=0.4)
+
+plt.title('shortest route')
+plt.savefig(Root+"shortest"+dt+".png")
 if plot==True:
    #sys.exit("Set to not plot")
     plt.show()
-    
