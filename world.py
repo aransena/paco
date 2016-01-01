@@ -124,13 +124,17 @@ class World:
         objs_found=0
         dist_travelled=0
         prev_city=self.cities[0]
-        for c in path[1:]:
+        
+        for c in path[:]:
+            #dist_travelled+=10#fixed cost associated with looking time
             if len(self.cities[c.index].objects)>0:
                 objs_found+=1
+            
             dist_travelled += self.calc_distance(self.cities[prev_city.index],self.cities[c.index])
-
+            prev_city=c
             if objs_found == self.num_objects:
                 return dist_travelled
+
 
         return -1
 

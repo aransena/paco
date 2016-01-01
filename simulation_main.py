@@ -15,20 +15,19 @@ ts = time.time()
 dt = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 Root = "Result_Images/"
 
-plot=True
-
+plot=False
 mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
-SEED_NUM=random.random()
+SEED_NUM=1
 random.seed(2)
 numpy.random.seed(2)
-NUM_CITIES=20
+NUM_CITIES=10
 NUM_ANTS=max(int(NUM_CITIES/5),2)
 NUM_STEPS=10
 WORLD_X = 100
 WORLD_Y = 100
 NUM_OBJECTS=max(int(NUM_CITIES/3),1)
-gamma=3
+gamma=1
 
 i_pher=1
 alpha=1
@@ -62,13 +61,13 @@ if mode==1:
 
 xx = numpy.linspace(0,10,NUM_CITIES)
 #yy = uniform.pdf(xx,1,4)
-y1 = uniform.pdf(xx,1,2)
-y2 = uniform.pdf(xx,6,7)
-#y1 = norm.pdf(xx,loc=5,scale=1)
+#y1 = uniform.pdf(xx,0,10)
+#y2 = uniform.pdf(xx,6,7)
+y1 = norm.pdf(xx,loc=2,scale=1)
 #y2 = norm.pdf(xx,loc=8,scale=1)
-yy = [a + b for a, b in zip(y1, y2)]
+#yy = [a + b for a, b in zip(y1, y2)]
 #print yy
-#yy=y1
+yy=y1
 #yy = lognorm.pdf(xx,50)
 
 yy = yy/(sum(yy))
@@ -127,6 +126,7 @@ time_to_find_shortest = locations.get_time_to_find_objects(shortest_path)
 time_to_find_maxLikelihood = locations.get_time_to_find_objects(max_likelihood_path)
 
 print "Run time: ", delT
+print "Time to find objects:"
 print "Shortest path: ", time_to_find_shortest, " PShifted: ", time_to_find_pshifted, " Improvement: ", (time_to_find_pshifted-time_to_find_shortest)/time_to_find_shortest
 print "Max Likelihood path: ", time_to_find_maxLikelihood, " PShifted: ", time_to_find_pshifted, " Improvement: ", (time_to_find_pshifted-time_to_find_maxLikelihood)/time_to_find_maxLikelihood
 
@@ -154,6 +154,8 @@ for i,c in enumerate(locations.cities):
         plt.plot(c.x, c.y,'go')
     elif i == len(locations.cities)-1:
         plt.plot(c.x, c.y,'ro')
+    elif len(c.objects)>0:
+        plt.plot(c.x, c.y,'yo')        
     else:
         plt.plot(c.x, c.y,'bo')
 
@@ -170,6 +172,8 @@ for i,c in enumerate(locations.cities):
         plt.plot(c.x, c.y,'go')
     elif i == len(locations.cities)-1:
         plt.plot(c.x, c.y,'ro')
+    elif len(c.objects)>0:
+        plt.plot(c.x, c.y,'yo')        
     else:
         plt.plot(c.x, c.y,'bo')
 
@@ -185,6 +189,8 @@ for i,c in enumerate(locations.cities):
         plt.plot(c.x, c.y,'go')
     elif i == len(locations.cities)-1:
         plt.plot(c.x, c.y,'ro')
+    elif len(c.objects)>0:
+        plt.plot(c.x, c.y,'yo')        
     else:
         plt.plot(c.x, c.y,'bo')
 
