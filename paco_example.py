@@ -8,7 +8,7 @@ world_x = 100
 world_y = 100
 increment = 360.0/num_cities
 
-aco = paco.ACO(num_cities,initial_pheromone=2,alpha=1,beta=3,epsilon=0.1,pheromone_deposit=2,evaporation_constant=0.4)
+aco = paco.ACO(num_cities,initial_pheromone=1,alpha=1,beta=3,epsilon=0.1,pheromone_deposit=2,evaporation_constant=0.6)
 
 for i in range(0, num_cities):
     aco.add_cities(paco.City(i, random.uniform(0,world_x), random.uniform(0,world_y)))
