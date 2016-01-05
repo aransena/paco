@@ -6,11 +6,6 @@ class City:
         self.index = i
         self.x = x_cord
         self.y = y_cord
-        self.objects = []
-        self.probability = prob
-        
-    def add_objects(hidden_objects):
-        self.objects.append(hidden_objects)
-    
+           
         
         

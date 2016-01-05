@@ -16,18 +16,18 @@ dt = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 Root = "Result_Images/"
 
 plot=False
-mode = 1 #Mode 0: Uninform random Distribution, Mode 1: Circle
+mode = 0 #Mode 0: Uninform random Distribution, Mode 1: Circle
 
 SEED_NUM=1
 random.seed(2)
 numpy.random.seed(2)
-NUM_CITIES=10
+NUM_CITIES=30
 NUM_ANTS=max(int(NUM_CITIES/5),2)
 NUM_STEPS=10
 WORLD_X = 100
 WORLD_Y = 100
 NUM_OBJECTS=max(int(NUM_CITIES/3),1)
-gamma=1
+gamma=1.4
 
 i_pher=1
 alpha=1
@@ -61,13 +61,13 @@ if mode==1:
 
 xx = numpy.linspace(0,10,NUM_CITIES)
 #yy = uniform.pdf(xx,1,4)
-#y1 = uniform.pdf(xx,0,10)
-#y2 = uniform.pdf(xx,6,7)
-y1 = norm.pdf(xx,loc=2,scale=1)
+y1 = uniform.pdf(xx,3,1)
+y2 = uniform.pdf(xx,7,0.5)
+#y1 = norm.pdf(xx,loc=5,scale=1)
 #y2 = norm.pdf(xx,loc=8,scale=1)
-#yy = [a + b for a, b in zip(y1, y2)]
+yy = [a + b for a, b in zip(y1, y2)]
 #print yy
-yy=y1
+#yy=y1
 #yy = lognorm.pdf(xx,50)
 
 yy = yy/(sum(yy))

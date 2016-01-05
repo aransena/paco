@@ -56,8 +56,8 @@ class Ant:
                 for c in self.unvisited:
 #                    self.transition_probs.append(self.calc_transition_prob(world,c))
                     self.transition_probs.append(self.get_transition_prob(world,c))
-                self.transition_probs= self.transition_probs/sum(self.transition_probs)
                 
+                self.transition_probs= self.transition_probs/sum(self.transition_probs)
                 selection = numpy.random.choice(self.unvisited,1,p=self.transition_probs)
                 next_city = selection[0]
                 self.path.append(next_city)
