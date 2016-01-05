@@ -41,11 +41,13 @@ class ACO:
                     self.attractiveness[i][j] = 0
 
     def update_pheromone(self,a):
-        for i in xrange(0,len(a.path)):
+        for i in xrange(0,len(a.path)-1):
             try:
+                #print "success ", a.index
                 curr_pher = self.pheromone[a.path[i].index][a.path[i+1].index]
                 self.pheromone[a.path[i].index][a.path[i+1].index] = curr_pher + self.pheromone_deposit/a.path_length
             except:
+                #print "error", a.index
                 break
 
         self.pheromone = self.pheromone*(1-self.evaporationConst)
@@ -107,17 +109,21 @@ class ACO:
                 ants.append(q.get())
             
             for a in ants:
+                #print a.index
                 path_len = a.calc_path_length()
                 path_lens.append(path_len)
                 paths.append(a.path)
+                self.update_pheromone(a)
+                self.update_routing_table(a)
+
 
             best_path_len = min(path_lens)
             best_path = paths[path_lens.index(best_path_len)]
+
+            print "step best path: ", best_path_len, " step: ", step+1
+            
             self.shortest_paths.append(best_path)
             self.shortest_paths_lens.append(best_path_len)
-            for a in ants:
-                self.update_pheromone(a)
-                self.update_routing_table(a)
 
         output_index = self.shortest_paths_lens.index(min(self.shortest_paths_lens))
         output_path = self.shortest_paths[output_index]
