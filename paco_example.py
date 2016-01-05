@@ -2,7 +2,7 @@ import paco
 import random
 import matplotlib.pyplot as plt
 
-num_cities = 100
+num_cities = 10
 world_x = 100
 world_y = 100
 
